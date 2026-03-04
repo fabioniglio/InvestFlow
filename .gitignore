@@ -1,0 +1,25 @@
+# Node
+node_modules/
+
+# Compiled output
+dist/
+build/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Angular cache
+.angular/
+
+# Coverage
+coverage/
+
+# IDEs
+.idea/
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
