@@ -1,245 +1,288 @@
-InvestFlow – Architecture Overview
-1. Project Overview
+# InvestFlow
 
-InvestFlow is a full-stack investment tracking application designed to:
+A full-stack investment tracking application for registering events, monitoring portfolio performance, and running financial simulations.
 
-Register investment events (buy, sell, dividend)
+![Angular](https://img.shields.io/badge/Angular-21-dd0031?logo=angular)
+![NestJS](https://img.shields.io/badge/NestJS-backend-e0234e?logo=nestjs)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-database-336791?logo=postgresql)
+![Docker](https://img.shields.io/badge/Docker-infrastructure-2496ed?logo=docker)
 
-Track portfolio performance
+---
 
-Integrate with real market APIs
+## Table of Contents
 
-Provide a timeline visualization of investment history
+1. [Project Overview](#1-project-overview)
+2. [Technology Stack](#2-technology-stack)
+3. [High-Level Architecture](#3-high-level-architecture)
+4. [Backend Architecture](#4-backend-architecture-nestjs)
+5. [Database Design](#5-database-design)
+6. [Frontend Architecture](#6-frontend-architecture-angular-21)
+7. [Infrastructure & Deployment](#7-infrastructure--deployment)
+8. [Getting Started](#8-getting-started)
+9. [Future Improvements](#9-future-improvements)
+10. [Architectural Principles](#10-architectural-principles)
 
-Calculate portfolio metrics and simulations (e.g., DCA)
+---
 
-2. Technology Stack
-Frontend
+## 1. Project Overview
 
-Angular 21
+InvestFlow lets you:
 
-Standalone components
+- Register investment events (buy, sell, dividend)
+- Track portfolio performance over time
+- Integrate with real market APIs (e.g. Alpha Vantage / Finnhub)
+- Visualize investment history on a timeline
+- Calculate portfolio metrics and run simulations (e.g. Dollar-Cost Averaging)
 
-Signals (state management)
+---
 
-Angular Router
+## 2. Technology Stack
 
-Chart.js or ApexCharts
+### Frontend
 
-Tailwind or Angular Material
+| Tool | Purpose |
+|------|---------|
+| Angular 21 | UI framework |
+| Standalone components | Component model |
+| Signals | State management |
+| Angular Router | Client-side routing (lazy-loaded) |
+| Chart.js / ApexCharts | Data visualization |
+| Tailwind / Angular Material | Styling |
 
-Backend
+### Backend
 
-Node.js
+| Tool | Purpose |
+|------|---------|
+| Node.js + NestJS | API framework |
+| PostgreSQL | Primary database |
+| `pg` (native driver) | Database connectivity |
+| SQL-first (no ORM) | Query management |
 
-NestJS
+### Infrastructure
 
-PostgreSQL
+| Tool | Purpose |
+|------|---------|
+| Docker | Containerization |
+| Docker Compose | Local orchestration |
+| Railway / Fly.io | Backend & DB hosting |
+| Netlify / Vercel | Frontend hosting |
 
-pg (native PostgreSQL driver)
+---
 
-SQL queries (no ORM)
+## 3. High-Level Architecture
 
-Infrastructure
-
-Docker
-
-Docker Compose (local development)
-
-Deployment target:
-
-Backend + DB: Railway or Fly.io
-
-Frontend: Netlify or Vercel
-
-3. High-Level Architecture
+```
 Angular 21 (Frontend)
-        ↓ HTTP REST
+       │  HTTP REST
+       ▼
 NestJS API (Backend)
-        ↓
-PostgreSQL
-        ↓
-External Market API (e.g. Alpha Vantage / Finnhub)
-4. Backend Architecture (NestJS)
-Architectural Style
+       │
+       ▼
+  PostgreSQL
+       │
+       ▼
+External Market API
+(Alpha Vantage / Finnhub)
+```
 
-Modular architecture
+---
 
-Clean separation of concerns
+## 4. Backend Architecture (NestJS)
 
-No ORM (SQL-first approach)
+### Design Decisions
 
-Repository pattern
+- **Modular architecture** — each domain is an isolated NestJS module
+- **No ORM** — SQL-first approach for full query control
+- **Repository pattern** — data access logic separated from business logic
+- **DTO validation** — input validated at the controller boundary
+- **Service layer** — business logic lives in services, not controllers
 
-DTO validation
+### Folder Structure
 
-Service layer business logic
-
-Backend Folder Structure
+```
 backend/
- ├── src/
- │    ├── main.ts
- │    ├── app.module.ts
- │    │
- │    ├── modules/
- │    │    ├── investments/
- │    │    │    ├── investments.module.ts
- │    │    │    ├── investments.controller.ts
- │    │    │    ├── investments.service.ts
- │    │    │    ├── investments.repository.ts
- │    │    │    ├── dto/
- │    │    │    │    ├── create-investment.dto.ts
- │    │    │    │    └── update-investment.dto.ts
- │    │    │    └── sql/
- │    │    │         ├── insert-investment.sql
- │    │    │         └── portfolio-summary.sql
- │    │
- │    ├── database/
- │    │    ├── database.module.ts
- │    │    ├── database.service.ts
- │    │    └── migrations/
- │    │         ├── 001_create_investments.sql
- │    │         └── 002_add_indexes.sql
- │    │
- │    ├── market/
- │    │    ├── market.module.ts
- │    │    ├── market.service.ts
- │    │    └── market.client.ts
- │    │
- │    └── common/
- │         ├── filters/
- │         ├── interceptors/
- │         └── utils/
- │
- ├── Dockerfile
- ├── package.json
- └── tsconfig.json
-5. Database Design
-investments table
+└── src/
+    ├── main.ts
+    ├── app.module.ts
+    │
+    ├── modules/
+    │   └── investments/
+    │       ├── investments.module.ts
+    │       ├── investments.controller.ts
+    │       ├── investments.service.ts
+    │       ├── investments.repository.ts
+    │       ├── dto/
+    │       │   ├── create-investment.dto.ts
+    │       │   └── update-investment.dto.ts
+    │       └── sql/
+    │           ├── insert-investment.sql
+    │           └── portfolio-summary.sql
+    │
+    ├── database/
+    │   ├── database.module.ts
+    │   ├── database.service.ts
+    │   └── migrations/
+    │       ├── 001_create_investments.sql
+    │       └── 002_add_indexes.sql
+    │
+    ├── market/
+    │   ├── market.module.ts
+    │   ├── market.service.ts
+    │   └── market.client.ts
+    │
+    └── common/
+        ├── filters/
+        ├── interceptors/
+        └── utils/
+```
+
+---
+
+## 5. Database Design
+
+### `investments` table
+
+```sql
 CREATE TABLE investments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    asset_symbol VARCHAR(10) NOT NULL,
-    type VARCHAR(20) NOT NULL,
-    quantity NUMERIC,
-    price NUMERIC,
-    amount NUMERIC,
-    date TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    asset_symbol VARCHAR(10)  NOT NULL,
+    type         VARCHAR(20)  NOT NULL,  -- 'buy' | 'sell' | 'dividend'
+    quantity     NUMERIC,
+    price        NUMERIC,
+    amount       NUMERIC,
+    date         TIMESTAMP    NOT NULL,
+    created_at   TIMESTAMP    DEFAULT NOW()
 );
-Recommended Indexes
+```
+
+### Indexes
+
+```sql
 CREATE INDEX idx_investments_asset ON investments(asset_symbol);
-CREATE INDEX idx_investments_date ON investments(date);
-6. Frontend Architecture (Angular 21)
-Architectural Principles
+CREATE INDEX idx_investments_date  ON investments(date);
+```
 
-Standalone components
+---
 
-Feature-based structure
+## 6. Frontend Architecture (Angular 21)
 
-Signals for state
+### Design Decisions
 
-Derived/computed portfolio metrics
+- **Standalone components** — no NgModules, simpler dependency graph
+- **Feature-based structure** — each feature owns its routes, components, and services
+- **Signals** — reactive state without RxJS overhead for derived/computed values
+- **Lazy-loaded routes** — features are loaded on demand
 
-REST API integration
+### Folder Structure
 
-Lazy-loaded routes
-
-Frontend Folder Structure
+```
 frontend/
- ├── src/
- │    ├── main.ts
- │    ├── app/
- │    │    ├── app.routes.ts
- │    │    │
- │    │    ├── core/
- │    │    │    ├── services/
- │    │    │    │    ├── api.service.ts
- │    │    │    │    └── portfolio.service.ts
- │    │    │    └── interceptors/
- │    │    │
- │    │    ├── shared/
- │    │    │    ├── components/
- │    │    │    └── models/
- │    │    │
- │    │    ├── features/
- │    │    │    ├── investments/
- │    │    │    │    ├── timeline/
- │    │    │    │    ├── dashboard/
- │    │    │    │    ├── filters/
- │    │    │    │    └── investments.routes.ts
- │    │    │    │
- │    │    │    └── simulation/
- │    │    │         ├── dca-simulator.component.ts
- │    │    │         └── simulation.service.ts
- │
- ├── Dockerfile
- ├── nginx.conf
- └── angular.json
-7. Infrastructure & Deployment
-Local Development
+└── src/
+    ├── main.ts
+    └── app/
+        ├── app.routes.ts
+        │
+        ├── core/
+        │   ├── services/
+        │   │   ├── api.service.ts
+        │   │   └── portfolio.service.ts
+        │   └── interceptors/
+        │
+        ├── shared/
+        │   ├── components/
+        │   └── models/
+        │
+        └── features/
+            ├── investments/
+            │   ├── timeline/
+            │   ├── dashboard/
+            │   ├── filters/
+            │   └── investments.routes.ts
+            │
+            └── simulation/
+                ├── dca-simulator.component.ts
+                └── simulation.service.ts
+```
 
-Docker Compose includes:
+---
 
-NestJS backend container
+## 7. Infrastructure & Deployment
 
-PostgreSQL container
+### Local Development
 
-Angular frontend container (optional for local)
+All services are orchestrated with Docker Compose:
 
-Example structure:
-
+```
 investflow/
- ├── backend/
- ├── frontend/
- └── docker-compose.yml
-Production Strategy
+├── backend/          # NestJS app
+├── frontend/         # Angular app
+└── docker-compose.yml
+```
 
-Option 1 (Recommended Initial Setup):
+The Compose stack includes:
+- NestJS backend container
+- PostgreSQL container
+- Angular frontend container (optional for local dev)
 
-Backend: Railway
+### Production
 
-Database: Railway PostgreSQL
+**Option 1 — Recommended for initial launch:**
 
-Frontend: Netlify or Vercel
+| Layer | Platform |
+|-------|---------|
+| Backend API | Railway |
+| Database | Railway PostgreSQL |
+| Frontend | Netlify or Vercel |
 
-Option 2 (Advanced):
+**Option 2 — Advanced:**
 
-Backend: Fly.io
+| Layer | Platform |
+|-------|---------|
+| Backend API | Fly.io |
+| Database | Managed PostgreSQL |
+| Frontend | Cloudflare Pages / Vercel |
 
-Database: Managed PostgreSQL
+---
 
-Frontend: Static hosting (Cloudflare / Vercel)
+## 8. Getting Started
 
-8. Future Improvements
+> Prerequisites: [Node.js](https://nodejs.org), [Docker](https://www.docker.com), [Docker Compose](https://docs.docker.com/compose/)
 
-JWT Authentication
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/investflow.git
+cd investflow
 
-Multi-user portfolio support
+# 2. Start all services
+docker compose up --build
 
-Market price caching layer
+# Backend API will be available at http://localhost:3000
+# Frontend will be available at http://localhost:4200
+```
 
-Background jobs (cron-based price updates)
+For running services individually, see the `README.md` files inside `backend/` and `frontend/`.
 
-Go microservice for financial simulations
+---
 
-CI/CD pipeline (GitHub Actions)
+## 9. Future Improvements
 
-Monitoring & logging
+- [ ] JWT Authentication
+- [ ] Multi-user portfolio support
+- [ ] Market price caching layer
+- [ ] Background jobs (cron-based price updates)
+- [ ] Go microservice for financial simulations
+- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] Monitoring & logging
+- [ ] Portfolio analytics module
 
-Portfolio analytics module
+---
 
-9. Architectural Principles
+## 10. Architectural Principles
 
-SQL-first design
-
-Clear separation of concerns
-
-Stateless backend
-
-RESTful API design
-
-Environment-based configuration
-
-Docker-first deployment
-
-Scalable service boundaries
+- **SQL-first design** — raw SQL for full control and visibility over queries
+- **Clear separation of concerns** — controller → service → repository layers
+- **Stateless backend** — no server-side session state
+- **RESTful API design** — predictable, resource-oriented endpoints
+- **Environment-based configuration** — no secrets in code
+- **Docker-first deployment** — consistent environments from local to production
+- **Scalable service boundaries** — modules are loosely coupled and independently deployable
