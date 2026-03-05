@@ -4,7 +4,18 @@
       "Bash(node:*)",
       "Bash(npm show:*)",
       "Bash(npx:*)",
-      "Bash(nest new:*)"
+      "Bash(nest new:*)",
+      "Bash(docker:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(netstat -ano)",
+      "Bash(npm start:*)",
+      "Bash(xargs -I{} taskkill //PID {} //F)",
+      "Bash(python:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell:*)"
     ]
   }
 }

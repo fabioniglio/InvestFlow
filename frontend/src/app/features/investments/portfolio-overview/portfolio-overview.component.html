@@ -1,0 +1,115 @@
+<div class="page-header">
+  <h1>Portfolio Overview</h1>
+</div>
+
+@if (loading()) {
+  <div class="spinner-container">
+    <mat-spinner />
+  </div>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (portfolio().length === 0) {
+  <div class="empty-state">
+    <mat-icon>account_balance_wallet</mat-icon>
+    <p>No investments yet. Go to Investments to add your first one.</p>
+  </div>
+} @else {
+  <div class="kpi-row">
+    <mat-card>
+      <mat-card-content>
+        <div class="kpi-label">Total Invested</div>
+        <div class="kpi-value">{{ totalInvested() | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-content>
+        <div class="kpi-label">Current Value</div>
+        <div class="kpi-value">
+          {{ totalCurrentValue() !== null ? (totalCurrentValue()! | currency) : '—' }}
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-content>
+        <div class="kpi-label">Total P&L</div>
+        @if (totalPnl() !== null) {
+          <div class="kpi-value" [ngClass]="totalPnl()! >= 0 ? 'positive' : 'negative'">
+            {{ totalPnl()! | currency }}
+            <span class="pnl-percent">({{ totalPnlPercent()! | number:'1.2-2' }}%)</span>
+          </div>
+        } @else {
+          <div class="kpi-value">—</div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-content>
+        <div class="kpi-label">Total Dividends</div>
+        <div class="kpi-value positive">{{ totalDividends() | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <h2>Holdings</h2>
+
+  <div class="asset-grid">
+    @for (asset of portfolio(); track asset.asset_symbol) {
+      <mat-card class="asset-card">
+        <mat-card-header>
+          <mat-card-title>{{ asset.asset_symbol }}</mat-card-title>
+          @if (asset.daily_change_percent !== null) {
+            <span class="daily-badge" [ngClass]="asset.daily_change_percent >= 0 ? 'positive' : 'negative'">
+              {{ asset.daily_change_percent >= 0 ? '+' : '' }}{{ asset.daily_change_percent | number:'1.2-2' }}% today
+            </span>
+          }
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stat-row">
+            <span class="stat-label">Qty Held</span>
+            <span class="stat-value">{{ asset.quantity_held | number:'1.0-4' }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Avg Buy Price</span>
+            <span class="stat-value">
+              {{ asset.avg_buy_price ? (asset.avg_buy_price | currency) : '—' }}
+            </span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Current Price</span>
+            <span class="stat-value">
+              {{ asset.current_price ? (asset.current_price | currency) : '—' }}
+            </span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Current Value</span>
+            <span class="stat-value">
+              {{ asset.current_value ? (asset.current_value | currency) : '—' }}
+            </span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">P&L</span>
+            <span class="stat-value" [ngClass]="(asset.pnl ?? 0) >= 0 ? 'positive' : 'negative'">
+              @if (asset.pnl !== null) {
+                {{ asset.pnl | currency }}
+                <span class="pnl-percent">({{ asset.pnl_percent | number:'1.2-2' }}%)</span>
+              } @else {
+                —
+              }
+            </span>
+          </div>
+          @if (+asset.total_dividends > 0) {
+            <div class="stat-row">
+              <span class="stat-label">Dividends</span>
+              <span class="stat-value positive">{{ asset.total_dividends | currency }}</span>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <app-portfolio-charts [portfolio]="portfolio()" />
+}

@@ -1,3 +1,5 @@
+name: investflow
+
 services:
   db:
     image: postgres:16-alpine
@@ -7,7 +9,7 @@ services:
       POSTGRES_PASSWORD: investflow
       POSTGRES_DB: investflow
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -19,16 +21,9 @@ services:
     environment:
       DATABASE_URL: postgresql://investflow:investflow@db:5432/investflow
       NODE_ENV: development
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY}
     depends_on:
       - db
-
-  frontend:
-    build: ./frontend
-    restart: unless-stopped
-    ports:
-      - "4200:80"
-    depends_on:
-      - backend
 
 volumes:
   postgres_data:

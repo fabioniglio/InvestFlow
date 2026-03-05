@@ -1,0 +1,92 @@
+<div class="page-header">
+  <h1>Investments</h1>
+  <button mat-flat-button color="primary" (click)="openForm()">
+    <mat-icon>add</mat-icon>
+    Add Investment
+  </button>
+</div>
+
+<mat-card class="filter-card">
+  <mat-card-content class="filters">
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label>Asset</mat-label>
+      <input matInput [(ngModel)]="filterAsset" placeholder="e.g. AAPL">
+    </mat-form-field>
+
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label>Type</mat-label>
+      <mat-select [(ngModel)]="filterType">
+        <mat-option value="">All</mat-option>
+        <mat-option value="buy">Buy</mat-option>
+        <mat-option value="sell">Sell</mat-option>
+        <mat-option value="dividend">Dividend</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="applyFilters()">Apply</button>
+    <button mat-button (click)="clearFilters()">Clear</button>
+  </mat-card-content>
+</mat-card>
+
+@if (loading()) {
+  <div class="spinner-container">
+    <mat-spinner />
+  </div>
+} @else if (investments().length === 0) {
+  <div class="empty-state">
+    <mat-icon>receipt_long</mat-icon>
+    <p>No investments found. Try adjusting filters or add a new one.</p>
+  </div>
+} @else {
+  <mat-card>
+    <table mat-table [dataSource]="investments()" class="full-width">
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let row">{{ row.date | date:'mediumDate' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="asset">
+        <th mat-header-cell *matHeaderCellDef>Asset</th>
+        <td mat-cell *matCellDef="let row"><strong>{{ row.asset_symbol }}</strong></td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="type-badge type-{{ row.type }}">{{ row.type }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="quantity">
+        <th mat-header-cell *matHeaderCellDef>Quantity</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.quantity ? (row.quantity | number:'1.0-4') : '—' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>Price</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.price ? (row.price | currency) : '—' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef>Amount</th>
+        <td mat-cell *matCellDef="let row">{{ row.amount | currency }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button color="warn" (click)="delete(row.id)" title="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+    </table>
+  </mat-card>
+}

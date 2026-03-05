@@ -1,0 +1,20 @@
+.brand {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.nav-active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 4px;
+}
+
+.page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
