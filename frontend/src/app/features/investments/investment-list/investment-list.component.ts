@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { Investment } from '../../../core/models/investment.model';
+import { DisplayCurrencyPipe } from '../../../core/pipes/display-currency.pipe';
 import { InvestmentsService } from '../../../core/services/investments.service';
 import { InvestmentFormComponent } from '../investment-form/investment-form.component';
 
@@ -27,7 +28,7 @@ import { InvestmentFormComponent } from '../investment-form/investment-form.comp
     MatSelectModule,
     MatInputModule,
     DatePipe,
-    CurrencyPipe,
+    DisplayCurrencyPipe,
     DecimalPipe,
     FormsModule,
   ],

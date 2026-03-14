@@ -15,6 +15,7 @@ export interface PortfolioValueRow extends PortfolioSummaryRow {
   pnl_percent: number | null;
   daily_change: number | null;
   daily_change_percent: number | null;
+  quote_error?: string;
 }
 
 @Injectable()
@@ -56,7 +57,9 @@ export class InvestmentsService {
 
     return Promise.all(
       summary.map(async (asset) => {
-        const quote = await this.market.getQuoteSafe(asset.asset_symbol);
+        const { quote, error: quoteError } = await this.market.getQuoteSafe(
+          asset.asset_symbol,
+        );
         const quantityHeld = Number(asset.quantity_held);
         const totalInvested = Number(asset.total_invested);
 
@@ -69,6 +72,7 @@ export class InvestmentsService {
             pnl_percent: null,
             daily_change: null,
             daily_change_percent: null,
+            quote_error: quoteError ?? undefined,
           };
         }
 

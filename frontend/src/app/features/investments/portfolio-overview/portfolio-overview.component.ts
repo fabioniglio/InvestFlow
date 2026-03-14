@@ -1,15 +1,16 @@
-import { CurrencyPipe, DecimalPipe, NgClass } from '@angular/common';
+import { DecimalPipe, NgClass } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PortfolioValue } from '../../../core/models/investment.model';
+import { DisplayCurrencyPipe } from '../../../core/pipes/display-currency.pipe';
 import { InvestmentsService } from '../../../core/services/investments.service';
 import { PortfolioChartsComponent } from '../portfolio-charts/portfolio-charts.component';
 
 @Component({
   selector: 'app-portfolio-overview',
-  imports: [MatCardModule, MatProgressSpinnerModule, MatIconModule, CurrencyPipe, DecimalPipe, NgClass, PortfolioChartsComponent],
+  imports: [MatCardModule, MatProgressSpinnerModule, MatIconModule, DisplayCurrencyPipe, DecimalPipe, NgClass, PortfolioChartsComponent],
   templateUrl: './portfolio-overview.component.html',
   styleUrl: './portfolio-overview.component.scss',
 })

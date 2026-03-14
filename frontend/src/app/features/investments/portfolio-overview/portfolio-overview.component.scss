@@ -101,6 +101,14 @@ mat-card-header {
 
 .stat-value {
   font-weight: 500;
+
+  .quote-error {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #888;
+    display: block;
+    margin-top: 2px;
+  }
 }
 
 .positive {

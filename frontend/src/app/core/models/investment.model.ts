@@ -26,6 +26,7 @@ export interface PortfolioValue extends PortfolioSummary {
   pnl_percent: number | null;
   daily_change: number | null;
   daily_change_percent: number | null;
+  quote_error?: string;
 }
 
 export interface CreateInvestmentDto {

@@ -5,6 +5,11 @@ import { MarketService } from './market.service';
 export class MarketController {
   constructor(private readonly service: MarketService) {}
 
+  @Get('rates')
+  getExchangeRates() {
+    return this.service.getExchangeRates();
+  }
+
   @Get('quote/:symbol')
   getQuote(@Param('symbol') symbol: string) {
     return this.service.getQuote(symbol.toUpperCase());

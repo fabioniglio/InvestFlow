@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  effect,
   ElementRef,
   inject,
   Input,
@@ -10,6 +11,7 @@ import {
 } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Investment, PortfolioValue } from '../../../core/models/investment.model';
+import { CurrencyService } from '../../../core/services/currency.service';
 import { InvestmentsService } from '../../../core/services/investments.service';
 
 Chart.register(...registerables);
@@ -33,10 +35,29 @@ export class PortfolioChartsComponent implements AfterViewInit, OnChanges, OnDes
   @ViewChild('historyCanvas') historyCanvas!: ElementRef<HTMLCanvasElement>;
 
   private service = inject(InvestmentsService);
+  private currencyService = inject(CurrencyService);
   private allocationChart?: Chart;
   private pnlChart?: Chart;
   private historyChart?: Chart;
   private viewReady = false;
+
+  constructor() {
+    effect(() => {
+      this.currencyService.selectedCurrency();
+      if (this.viewReady) this.renderCharts();
+    });
+  }
+
+  private formatCurrency(amount: number): string {
+    const rate = this.currencyService.getRate();
+    const code = this.currencyService.getCurrencyCode();
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: code,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount * rate);
+  }
 
   ngAfterViewInit(): void {
     this.viewReady = true;
@@ -84,7 +105,7 @@ export class PortfolioChartsComponent implements AfterViewInit, OnChanges, OnDes
           legend: { position: 'right' },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` $${(ctx.raw as number).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+              label: (ctx) => ` ${this.formatCurrency(ctx.raw as number)}`,
             },
           },
         },
@@ -103,7 +124,7 @@ export class PortfolioChartsComponent implements AfterViewInit, OnChanges, OnDes
         labels: assets.map((a) => a.asset_symbol),
         datasets: [
           {
-            label: 'P&L ($)',
+            label: `P&L (${this.currencyService.getCurrencyCode()})`,
             data: assets.map((a) => +(a.pnl ?? 0).toFixed(2)),
             backgroundColor: assets.map((a) =>
               (a.pnl ?? 0) >= 0 ? 'rgba(46, 125, 50, 0.8)' : 'rgba(198, 40, 40, 0.8)',
@@ -118,7 +139,7 @@ export class PortfolioChartsComponent implements AfterViewInit, OnChanges, OnDes
         scales: {
           y: {
             ticks: {
-              callback: (v) => `$${(+v).toLocaleString()}`,
+              callback: (v) => this.formatCurrency(+(v ?? 0)),
             },
           },
         },
@@ -157,7 +178,7 @@ export class PortfolioChartsComponent implements AfterViewInit, OnChanges, OnDes
         labels: points.map((p) => p.x),
         datasets: [
           {
-            label: 'Total Invested ($)',
+            label: `Total Invested (${this.currencyService.getCurrencyCode()})`,
             data: points.map((p) => p.y),
             borderColor: '#4285F4',
             backgroundColor: 'rgba(66, 133, 244, 0.1)',
@@ -172,7 +193,7 @@ export class PortfolioChartsComponent implements AfterViewInit, OnChanges, OnDes
         plugins: { legend: { display: false } },
         scales: {
           y: {
-            ticks: { callback: (v) => `$${(+v).toLocaleString()}` },
+            ticks: { callback: (v) => this.formatCurrency(+(v ?? 0)) },
           },
         },
       },
