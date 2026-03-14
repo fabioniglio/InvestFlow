@@ -4,9 +4,12 @@ import * as path from 'path';
 import { DatabaseService } from '../../database/database.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 
+export type AssetClass = 'stock' | 'etf' | 'crypto' | 'mutual_fund' | 'other';
+
 export interface Investment {
   id: string;
   asset_symbol: string;
+  asset_class: AssetClass;
   type: 'buy' | 'sell' | 'dividend';
   quantity: number | null;
   price: number | null;
@@ -38,9 +41,9 @@ export class InvestmentsRepository {
 
   constructor(private readonly db: DatabaseService) {}
 
-  async findAll(filters: InvestmentFilters): Promise<Investment[]> {
-    const conditions: string[] = [];
-    const params: unknown[] = [];
+  async findAll(userId: string, filters: InvestmentFilters): Promise<Investment[]> {
+    const conditions: string[] = ['user_id = $1'];
+    const params: unknown[] = [userId];
 
     if (filters.asset_symbol) {
       params.push(filters.asset_symbol.toUpperCase());
@@ -62,29 +65,34 @@ export class InvestmentsRepository {
       conditions.push(`date <= $${params.length}`);
     }
 
-    const where =
-      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const where = `WHERE ${conditions.join(' AND ')}`;
     const sql = `SELECT * FROM investments ${where} ORDER BY date DESC`;
 
     const { rows } = await this.db.query<Investment>(sql, params);
     return rows;
   }
 
-  async findOne(id: string): Promise<Investment | null> {
+  async findOne(userId: string, id: string): Promise<Investment | null> {
     const { rows } = await this.db.query<Investment>(
-      'SELECT * FROM investments WHERE id = $1',
-      [id],
+      'SELECT * FROM investments WHERE id = $1 AND user_id = $2',
+      [id, userId],
     );
     return rows[0] ?? null;
   }
 
-  async create(dto: CreateInvestmentDto): Promise<Investment> {
+  async create(userId: string, dto: CreateInvestmentDto): Promise<Investment> {
     const sql = fs.readFileSync(
       path.join(this.sqlDir, 'insert-investment.sql'),
       'utf8',
     );
+    const symbol =
+      dto.asset_class === 'crypto'
+        ? dto.asset_symbol
+        : dto.asset_symbol.toUpperCase();
     const { rows } = await this.db.query<Investment>(sql, [
-      dto.asset_symbol.toUpperCase(),
+      userId,
+      symbol,
+      dto.asset_class ?? 'stock',
       dto.type,
       dto.quantity ?? null,
       dto.price ?? null,
@@ -95,20 +103,20 @@ export class InvestmentsRepository {
     return rows[0];
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(userId: string, id: string): Promise<boolean> {
     const { rowCount } = await this.db.query(
-      'DELETE FROM investments WHERE id = $1',
-      [id],
+      'DELETE FROM investments WHERE id = $1 AND user_id = $2',
+      [id, userId],
     );
     return (rowCount ?? 0) > 0;
   }
 
-  async getPortfolioSummary(): Promise<PortfolioSummaryRow[]> {
+  async getPortfolioSummary(userId: string): Promise<PortfolioSummaryRow[]> {
     const sql = fs.readFileSync(
       path.join(this.sqlDir, 'portfolio-summary.sql'),
       'utf8',
     );
-    const { rows } = await this.db.query<PortfolioSummaryRow>(sql);
+    const { rows } = await this.db.query<PortfolioSummaryRow>(sql, [userId]);
     return rows;
   }
 }

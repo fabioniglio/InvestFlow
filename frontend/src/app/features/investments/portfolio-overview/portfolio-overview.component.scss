@@ -41,6 +41,12 @@
   margin-bottom: 4px;
 }
 
+.kpi-sublabel {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 2px;
+}
+
 .kpi-value {
   font-size: 1.5rem;
   font-weight: 600;
@@ -63,6 +69,12 @@ mat-card-header {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
+}
+
+.asset-name {
+  font-weight: 400;
+  font-size: 0.9em;
+  color: #666;
 }
 
 .daily-badge {

@@ -36,7 +36,8 @@ export class InvestmentFormComponent {
   saving = false;
 
   form = this.fb.group({
-    asset_symbol: ['', [Validators.required, Validators.maxLength(10)]],
+    asset_class: ['stock' as 'stock' | 'etf' | 'crypto' | 'mutual_fund' | 'other'],
+    asset_symbol: ['', [Validators.required, Validators.maxLength(24)]],
     type: ['buy' as 'buy' | 'sell' | 'dividend', Validators.required],
     quantity: [null as number | null],
     price: [null as number | null],
@@ -63,9 +64,11 @@ export class InvestmentFormComponent {
     this.saving = true;
     const val = this.form.getRawValue();
 
+    const isCrypto = val.asset_class === 'crypto';
     this.service
       .create({
-        asset_symbol: val.asset_symbol!.toUpperCase(),
+        asset_symbol: isCrypto ? val.asset_symbol! : val.asset_symbol!.toUpperCase(),
+        asset_class: val.asset_class ?? undefined,
         type: val.type!,
         quantity: val.quantity ?? undefined,
         price: val.price ?? undefined,
@@ -87,5 +90,27 @@ export class InvestmentFormComponent {
 
   cancel(): void {
     this.dialogRef.close();
+  }
+
+  symbolPlaceholder(): string {
+    const ac = this.form.get('asset_class')?.value;
+    switch (ac) {
+      case 'crypto':
+        return 'e.g. BINANCE:BTCUSDT';
+      case 'etf':
+        return 'e.g. SPY, VOO';
+      case 'mutual_fund':
+        return 'e.g. VFIAX';
+      default:
+        return 'e.g. AAPL, MSFT';
+    }
+  }
+
+  symbolHint(): string {
+    const ac = this.form.get('asset_class')?.value;
+    if (ac === 'crypto') {
+      return 'Use EXCHANGE:PAIR (e.g. BINANCE:BTCUSDT) for current price from Finnhub';
+    }
+    return '';
   }
 }

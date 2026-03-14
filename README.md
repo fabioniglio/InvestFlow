@@ -21,6 +21,8 @@ A full-stack investment tracking application for registering events, monitoring 
 8. [Getting Started](#8-getting-started)
 9. [Future Improvements](#9-future-improvements)
 10. [Architectural Principles](#10-architectural-principles)
+11. [Market data: stocks, ETFs, crypto](#11-market-data-stocks-etfs-crypto)
+12. [Users and authentication](#12-users-and-authentication)
 
 ---
 
@@ -286,3 +288,18 @@ For running services individually, see the `README.md` files inside `backend/` a
 - **Environment-based configuration** — no secrets in code
 - **Docker-first deployment** — consistent environments from local to production
 - **Scalable service boundaries** — modules are loosely coupled and independently deployable
+
+---
+
+## 11. Market data: stocks, ETFs, crypto
+
+Portfolio **holdings and history** are stored in the database; **current prices** come from Finnhub (and Yahoo as fallback). Supported asset types and symbol formats (e.g. stocks/ETFs by ticker, crypto as `BINANCE:BTCUSDT`) are described in **[docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)**.
+
+---
+
+## 12. Users and authentication
+
+- **Each portfolio and its investments belong to a user.** The API requires a valid JWT for all `/investments` and `/market` routes.
+- **Simple login:** email + password. Register at `/register`, sign in at `/login`. Token is stored in `localStorage` and sent as `Authorization: Bearer <token>`.
+- **Backend:** `users` table (id, email, password_hash); `investments.user_id` references `users.id`. Passwords are hashed with bcrypt. JWT is signed with `JWT_SECRET` (set in env; use a long random string in production).
+- **Default user (existing data):** On first backend startup, if the `users` table is empty, a default user is created (`default@investflow.local` / `changeme`) and all existing investments are assigned to that user. Sign in with those credentials to see existing data, then create a new account and move data if needed.

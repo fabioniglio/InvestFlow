@@ -12,5 +12,6 @@ SELECT
     ELSE NULL
   END AS avg_buy_price
 FROM investments
+WHERE user_id = $1
 GROUP BY asset_symbol
 ORDER BY asset_symbol;

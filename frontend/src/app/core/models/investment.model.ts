@@ -1,6 +1,9 @@
+export type AssetClass = 'stock' | 'etf' | 'crypto' | 'mutual_fund' | 'other';
+
 export interface Investment {
   id: string;
   asset_symbol: string;
+  asset_class?: AssetClass;
   type: 'buy' | 'sell' | 'dividend';
   quantity: number | null;
   price: number | null;
@@ -20,6 +23,7 @@ export interface PortfolioSummary {
 }
 
 export interface PortfolioValue extends PortfolioSummary {
+  asset_name?: string | null;
   current_price: number | null;
   current_value: number | null;
   pnl: number | null;
@@ -31,6 +35,7 @@ export interface PortfolioValue extends PortfolioSummary {
 
 export interface CreateInvestmentDto {
   asset_symbol: string;
+  asset_class?: AssetClass;
   type: 'buy' | 'sell' | 'dividend';
   quantity?: number;
   price?: number;

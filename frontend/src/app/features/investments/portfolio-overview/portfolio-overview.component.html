@@ -47,8 +47,9 @@
 
     <mat-card>
       <mat-card-content>
-        <div class="kpi-label">Total Dividends</div>
+        <div class="kpi-label">Dividend income</div>
         <div class="kpi-value positive">{{ totalDividends() | displayCurrency }}</div>
+        <div class="kpi-sublabel">Earnings from dividends</div>
       </mat-card-content>
     </mat-card>
   </div>
@@ -59,7 +60,12 @@
     @for (asset of portfolio(); track asset.asset_symbol) {
       <mat-card class="asset-card">
         <mat-card-header>
-          <mat-card-title>{{ asset.asset_symbol }}</mat-card-title>
+          <mat-card-title>
+            {{ asset.asset_symbol }}
+            @if (asset.asset_name) {
+              <span class="asset-name"> — {{ asset.asset_name }}</span>
+            }
+          </mat-card-title>
           @if (asset.daily_change_percent !== null) {
             <span class="daily-badge" [ngClass]="asset.daily_change_percent >= 0 ? 'positive' : 'negative'">
               {{ asset.daily_change_percent >= 0 ? '+' : '' }}{{ asset.daily_change_percent | number:'1.2-2' }}% today

@@ -2,8 +2,25 @@
 
 <mat-dialog-content [formGroup]="form">
   <mat-form-field class="full-width">
+    <mat-label>Asset class</mat-label>
+    <mat-select formControlName="asset_class">
+      <mat-option value="stock">Stock</mat-option>
+      <mat-option value="etf">ETF</mat-option>
+      <mat-option value="crypto">Crypto</mat-option>
+      <mat-option value="mutual_fund">Mutual fund</mat-option>
+      <mat-option value="other">Other</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
     <mat-label>Asset Symbol</mat-label>
-    <input matInput formControlName="asset_symbol" placeholder="e.g. AAPL" style="text-transform: uppercase">
+    <input
+      matInput
+      formControlName="asset_symbol"
+      [placeholder]="symbolPlaceholder()"
+      [style.textTransform]="(form.get('asset_class')?.value === 'crypto') ? 'none' : 'uppercase'"
+    >
+    <mat-hint>{{ symbolHint() }}</mat-hint>
     @if (form.get('asset_symbol')!.hasError('required')) {
       <mat-error>Required</mat-error>
     }

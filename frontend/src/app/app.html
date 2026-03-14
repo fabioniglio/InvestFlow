@@ -1,9 +1,13 @@
 <mat-toolbar color="primary">
   <span class="brand">InvestFlow</span>
   <span class="spacer"></span>
-  <app-currency-selector />
-  <a mat-button routerLink="/portfolio" routerLinkActive="nav-active">Portfolio</a>
-  <a mat-button routerLink="/investments" routerLinkActive="nav-active">Investments</a>
+  @if (auth.currentUser()) {
+    <app-currency-selector />
+    <a mat-button routerLink="/portfolio" routerLinkActive="nav-active">Portfolio</a>
+    <a mat-button routerLink="/investments" routerLinkActive="nav-active">Investments</a>
+    <span class="user-email">{{ auth.currentUser()?.email }}</span>
+    <button mat-button (click)="auth.logout()">Logout</button>
+  }
 </mat-toolbar>
 
 <main class="page-content">

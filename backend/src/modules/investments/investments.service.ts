@@ -9,6 +9,7 @@ import {
 } from './investments.repository';
 
 export interface PortfolioValueRow extends PortfolioSummaryRow {
+  asset_name?: string | null;
   current_price: number | null;
   current_value: number | null;
   pnl: number | null;
@@ -25,47 +26,50 @@ export class InvestmentsService {
     private readonly market: MarketService,
   ) {}
 
-  findAll(filters: InvestmentFilters): Promise<Investment[]> {
-    return this.repo.findAll(filters);
+  findAll(userId: string, filters: InvestmentFilters): Promise<Investment[]> {
+    return this.repo.findAll(userId, filters);
   }
 
-  async findOne(id: string): Promise<Investment> {
-    const investment = await this.repo.findOne(id);
+  async findOne(userId: string, id: string): Promise<Investment> {
+    const investment = await this.repo.findOne(userId, id);
     if (!investment) {
       throw new NotFoundException(`Investment ${id} not found`);
     }
     return investment;
   }
 
-  create(dto: CreateInvestmentDto): Promise<Investment> {
-    return this.repo.create(dto);
+  create(userId: string, dto: CreateInvestmentDto): Promise<Investment> {
+    return this.repo.create(userId, dto);
   }
 
-  async delete(id: string): Promise<void> {
-    const deleted = await this.repo.delete(id);
+  async delete(userId: string, id: string): Promise<void> {
+    const deleted = await this.repo.delete(userId, id);
     if (!deleted) {
       throw new NotFoundException(`Investment ${id} not found`);
     }
   }
 
-  getPortfolioSummary(): Promise<PortfolioSummaryRow[]> {
-    return this.repo.getPortfolioSummary();
+  getPortfolioSummary(userId: string): Promise<PortfolioSummaryRow[]> {
+    return this.repo.getPortfolioSummary(userId);
   }
 
-  async getPortfolioValue(): Promise<PortfolioValueRow[]> {
-    const summary = await this.repo.getPortfolioSummary();
+  async getPortfolioValue(userId: string): Promise<PortfolioValueRow[]> {
+    const summary = await this.repo.getPortfolioSummary(userId);
 
     return Promise.all(
       summary.map(async (asset) => {
-        const { quote, error: quoteError } = await this.market.getQuoteSafe(
-          asset.asset_symbol,
-        );
+        const [quoteResult, assetName] = await Promise.all([
+          this.market.getQuoteSafe(asset.asset_symbol),
+          this.market.getSymbolName(asset.asset_symbol),
+        ]);
+        const { quote, error: quoteError } = quoteResult;
         const quantityHeld = Number(asset.quantity_held);
         const totalInvested = Number(asset.total_invested);
 
         if (!quote) {
           return {
             ...asset,
+            asset_name: assetName ?? undefined,
             current_price: null,
             current_value: null,
             pnl: null,
@@ -81,6 +85,7 @@ export class InvestmentsService {
 
         return {
           ...asset,
+          asset_name: assetName ?? undefined,
           current_price: quote.price,
           current_value: currentValue,
           pnl,

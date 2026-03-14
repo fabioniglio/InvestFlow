@@ -11,11 +11,17 @@ import {
 
 export type InvestmentType = 'buy' | 'sell' | 'dividend';
 
+export type AssetClass = 'stock' | 'etf' | 'crypto' | 'mutual_fund' | 'other';
+
 export class CreateInvestmentDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(10)
+  @MaxLength(24)
   asset_symbol: string;
+
+  @IsOptional()
+  @IsEnum(['stock', 'etf', 'crypto', 'mutual_fund', 'other'])
+  asset_class?: AssetClass;
 
   @IsEnum(['buy', 'sell', 'dividend'])
   type: InvestmentType;

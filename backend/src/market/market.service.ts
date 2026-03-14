@@ -52,6 +52,11 @@ export class MarketService implements OnModuleInit {
     { quote: MarketQuote; expiresAt: number }
   >();
   private ratesCache: { rates: ExchangeRates; expiresAt: number } | null = null;
+  private profileCache = new Map<
+    string,
+    { name: string | null; expiresAt: number }
+  >();
+  private static readonly PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
   private finnhubToken: string | undefined;
   private yf: { quote(symbol: string): Promise<YahooQuoteResult> };
 
@@ -157,6 +162,40 @@ export class MarketService implements OnModuleInit {
         this.logger.debug(stack);
       }
       return { quote: null, error: msg };
+    }
+  }
+
+  /**
+   * Returns company/security name for a symbol (e.g. "Apple Inc." for AAPL).
+   * Uses Finnhub Company Profile 2; cached 24h. Returns null if not available (e.g. ETF/crypto).
+   */
+  async getSymbolName(symbol: string): Promise<string | null> {
+    const sym = symbol?.toUpperCase?.() ?? symbol;
+    if (sym.includes(':')) {
+      return null;
+    }
+    const cached = this.profileCache.get(sym);
+    if (cached && Date.now() < cached.expiresAt) {
+      return cached.name;
+    }
+    const token = this.finnhubToken;
+    if (!token) return null;
+    const url = `https://finnhub.io/api/v1/stock/profile2?symbol=${encodeURIComponent(sym)}&token=${encodeURIComponent(token)}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = (await res.json()) as { name?: string };
+      const name =
+        typeof data?.name === 'string' && data.name.trim()
+          ? data.name.trim()
+          : null;
+      this.profileCache.set(sym, {
+        name,
+        expiresAt: Date.now() + MarketService.PROFILE_CACHE_TTL_MS,
+      });
+      return name;
+    } catch {
+      return null;
     }
   }
 
