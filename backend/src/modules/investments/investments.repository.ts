@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { DatabaseService } from '../../database/database.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { UpdateInvestmentDto } from './dto/update-investment.dto';
 
 export type AssetClass = 'stock' | 'etf' | 'crypto' | 'mutual_fund' | 'other';
 
@@ -101,6 +102,62 @@ export class InvestmentsRepository {
       dto.notes ?? null,
     ]);
     return rows[0];
+  }
+
+  async update(
+    userId: string,
+    id: string,
+    dto: UpdateInvestmentDto,
+  ): Promise<Investment | null> {
+    const updates: string[] = [];
+    const params: unknown[] = [];
+    let idx = 1;
+
+    if (dto.asset_symbol !== undefined) {
+      const sym =
+        dto.asset_class === 'crypto'
+          ? dto.asset_symbol
+          : dto.asset_symbol.toUpperCase();
+      updates.push(`asset_symbol = $${idx++}`);
+      params.push(sym);
+    }
+    if (dto.asset_class !== undefined) {
+      updates.push(`asset_class = $${idx++}`);
+      params.push(dto.asset_class);
+    }
+    if (dto.type !== undefined) {
+      updates.push(`type = $${idx++}`);
+      params.push(dto.type);
+    }
+    if (dto.quantity !== undefined) {
+      updates.push(`quantity = $${idx++}`);
+      params.push(dto.quantity);
+    }
+    if (dto.price !== undefined) {
+      updates.push(`price = $${idx++}`);
+      params.push(dto.price);
+    }
+    if (dto.amount !== undefined) {
+      updates.push(`amount = $${idx++}`);
+      params.push(dto.amount);
+    }
+    if (dto.date !== undefined) {
+      updates.push(`date = $${idx++}`);
+      params.push(dto.date);
+    }
+    if (dto.notes !== undefined) {
+      updates.push(`notes = $${idx++}`);
+      params.push(dto.notes);
+    }
+
+    if (updates.length === 0) {
+      return this.findOne(userId, id);
+    }
+
+    params.push(id, userId);
+    const sql = `UPDATE investments SET ${updates.join(', ')} WHERE id = $${idx++} AND user_id = $${idx} RETURNING *`;
+    const { rows } = await this.db.query<Investment>(sql, params);
+    return rows[0] ?? null;
   }
 
   async delete(userId: string, id: string): Promise<boolean> {

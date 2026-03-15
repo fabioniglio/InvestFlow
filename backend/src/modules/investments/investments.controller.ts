@@ -6,11 +6,13 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { InvestmentsService } from './investments.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
@@ -55,6 +57,15 @@ export class InvestmentsController {
   @HttpCode(HttpStatus.CREATED)
   create(@CurrentUser() user: { id: string; email: string }, @Body() dto: CreateInvestmentDto) {
     return this.service.create(user.id, dto);
+  }
+
+  @Patch(':id')
+  update(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('id') id: string,
+    @Body() dto: UpdateInvestmentDto,
+  ) {
+    return this.service.update(user.id, id, dto);
   }
 
   @Delete(':id')

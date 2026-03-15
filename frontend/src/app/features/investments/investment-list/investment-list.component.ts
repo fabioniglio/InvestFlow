@@ -78,6 +78,16 @@ export class InvestmentListComponent implements OnInit {
     });
   }
 
+  edit(investment: Investment): void {
+    const ref = this.dialog.open(InvestmentFormComponent, {
+      width: '500px',
+      data: { investment },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result) this.load();
+    });
+  }
+
   delete(id: string): void {
     this.service.delete(id).subscribe({
       next: () => {

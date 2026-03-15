@@ -1,5 +1,14 @@
 export type AssetClass = 'stock' | 'etf' | 'crypto' | 'mutual_fund' | 'other';
 
+export interface Asset {
+  symbol: string;
+  name: string;
+  asset_class: AssetClass;
+  exchange?: string | null;
+  source?: string | null;
+  updated_at?: string;
+}
+
 export interface Investment {
   id: string;
   asset_symbol: string;

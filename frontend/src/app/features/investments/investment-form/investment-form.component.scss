@@ -15,3 +15,11 @@ mat-dialog-content {
   padding-top: 8px !important;
   min-width: 420px;
 }
+
+.symbol-option {
+  font-weight: 500;
+}
+.symbol-name {
+  color: var(--mat-form-field-supporting-text-color, #666);
+  font-size: 0.9em;
+}

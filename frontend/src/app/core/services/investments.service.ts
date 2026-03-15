@@ -8,6 +8,17 @@ import {
 } from '../models/investment.model';
 import { ApiService } from './api.service';
 
+export interface UpdateInvestmentDto {
+  asset_symbol?: string;
+  asset_class?: 'stock' | 'etf' | 'crypto' | 'mutual_fund' | 'other';
+  type?: 'buy' | 'sell' | 'dividend';
+  quantity?: number;
+  price?: number;
+  amount?: number;
+  date?: string;
+  notes?: string;
+}
+
 export interface InvestmentFilters {
   asset?: string;
   type?: string;
@@ -38,6 +49,10 @@ export class InvestmentsService {
 
   create(dto: CreateInvestmentDto): Observable<Investment> {
     return this.api.post<Investment>('/investments', dto);
+  }
+
+  update(id: string, dto: UpdateInvestmentDto): Observable<Investment> {
+    return this.api.patch<Investment>(`/investments/${id}`, dto);
   }
 
   delete(id: string): Observable<void> {

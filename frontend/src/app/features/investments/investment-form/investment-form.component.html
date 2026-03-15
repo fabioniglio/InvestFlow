@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Add Investment</h2>
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Investment' : 'Add Investment' }}</h2>
 
 <mat-dialog-content [formGroup]="form">
   <mat-form-field class="full-width">
@@ -17,9 +17,25 @@
     <input
       matInput
       formControlName="asset_symbol"
+      [matAutocomplete]="symbolAutocomplete"
       [placeholder]="symbolPlaceholder()"
       [style.textTransform]="(form.get('asset_class')?.value === 'crypto') ? 'none' : 'uppercase'"
+      (input)="onSymbolInput()"
     >
+    <mat-autocomplete
+      #symbolAutocomplete="matAutocomplete"
+      [displayWith]="displaySymbol"
+      (optionSelected)="onSymbolSelected($event)"
+    >
+      @for (asset of symbolSuggestions(); track asset.symbol) {
+        <mat-option [value]="asset">
+          <span class="symbol-option">{{ asset.symbol }}</span>
+          @if (asset.name) {
+            <span class="symbol-name"> — {{ asset.name }}</span>
+          }
+        </mat-option>
+      }
+    </mat-autocomplete>
     <mat-hint>{{ symbolHint() }}</mat-hint>
     @if (form.get('asset_symbol')!.hasError('required')) {
       <mat-error>Required</mat-error>

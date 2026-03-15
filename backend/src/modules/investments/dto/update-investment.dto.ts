@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsEnum,
@@ -8,27 +9,36 @@ import {
   MaxLength,
 } from 'class-validator';
 
+export type AssetClass = 'stock' | 'etf' | 'crypto' | 'mutual_fund' | 'other';
+
 export class UpdateInvestmentDto {
   @IsOptional()
   @IsString()
-  @MaxLength(10)
+  @MaxLength(24)
   asset_symbol?: string;
+
+  @IsOptional()
+  @IsEnum(['stock', 'etf', 'crypto', 'mutual_fund', 'other'])
+  asset_class?: AssetClass;
 
   @IsOptional()
   @IsEnum(['buy', 'sell', 'dividend'])
   type?: 'buy' | 'sell' | 'dividend';
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   quantity?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   price?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   amount?: number;

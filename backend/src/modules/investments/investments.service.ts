@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { MarketService } from '../../market/market.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import {
   Investment,
   InvestmentFilters,
@@ -40,6 +41,18 @@ export class InvestmentsService {
 
   create(userId: string, dto: CreateInvestmentDto): Promise<Investment> {
     return this.repo.create(userId, dto);
+  }
+
+  async update(
+    userId: string,
+    id: string,
+    dto: UpdateInvestmentDto,
+  ): Promise<Investment> {
+    const updated = await this.repo.update(userId, id, dto);
+    if (!updated) {
+      throw new NotFoundException(`Investment ${id} not found`);
+    }
+    return updated;
   }
 
   async delete(userId: string, id: string): Promise<void> {
